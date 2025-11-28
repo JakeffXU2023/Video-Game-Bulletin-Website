@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Game Bulletin - Calendar</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <header>
+    <div class="logo">
+      <img src="images/VGB_Logo.png" alt="Logo" class="logo-img">
+      VIDEO GAME BULLETIN
+    </div>
+    <nav>
+      <a href="index.html">HOME</a>
+      <a href="calendar.html" class="active">CALENDAR</a>
+      <a href="reviews.html">REVIEWS</a>
+    </nav>
+    <div class="auth">
+      <button class="login">Log in</button>
+      <button class="signup">Create an account!</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Release Details Panel -->
+<div id="release-panel" class="release-panel hidden">
+  <button id="close-panel">×</button>
+  <h3 id="panel-date">Releases on ...</h3>
+  <div id="panel-content" class="panel-content"></div>
+</div>
+
+    <section class="calendar">
+      <h2 id="month-year"></h2>
+      <div class="controls">
+        <button onclick="prevMonth()">&#9664; Prev</button>
+        <button onclick="nextMonth()">Next &#9654;</button>
+      </div>
+      <div class="calendar-grid" id="calendar"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Video Game Bulletin</p>
+  </footer>
+
+  <!-- Firebase and Auth -->
+  <script type="module" src="firebaseAuth.js"></script>
+  <script type="module" src="auth.js"></script>
+  <script src="script.js"></script>
+
+  <!-- Calendar module -->
+  <script type="module">
+    import { initCalendar } from "./calendar.js";
+
+    // Wait for DOM to be fully loaded
+    document.addEventListener("DOMContentLoaded", () => {
+      initCalendar();
+    });
+  </script>
+  <script type="module">
+import { initAuthPanel } from "./authPanel.js";
+document.addEventListener("DOMContentLoaded", () => {
+  initAuthPanel();
+});
+</script>
+</body>
+</html>

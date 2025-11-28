@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Game Bulletin - Reviews</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <header>
+      <div class="logo">
+    <img src="images\VGB_Logo.png" alt="Logo" class="logo-img">
+    VIDEO GAME BULLETIN
+  </div>
+    <nav>
+      <a href="index.html">HOME</a>
+      <a href="calendar.html">CALENDAR</a>
+      <a href="reviews.html" class="active">REVIEWS</a>
+    </nav>
+    <div class="auth">
+      <button class="login">Log in</button>
+      <button class="signup">Create an account!</button>
+    </div>
+  </header>
+
+  <main>
+
+  <section class="reviews">
+  <h2>Game Reviews</h2>
+
+  <!-- Game selection dropdown -->
+  <label for="game-select">Select a game:</label>
+  <select id="game-select">
+    <option disabled selected>Select a game</option>
+  </select>
+
+  <button id="add-review-btn">Add Review</button>
+
+  <!-- Reviews will appear here -->
+</section>
+
+  <!-- Add Review -->
+  <section id="addReviewSection" class="add-review">
+    <h3>Write a Review</h3>
+
+    <div class="star-rating" id="starSelector">
+      <span data-value="1">★</span>
+      <span data-value="2">★</span>
+      <span data-value="3">★</span>
+      <span data-value="4">★</span>
+      <span data-value="5">★</span>
+    </div>
+
+    <textarea id="reviewText" placeholder="Write your review here..."></textarea>
+
+    <button id="submitReviewBtn">Submit Review</button>
+  </section>
+
+  <!-- Sorting Controls -->
+  <section class="sorting">
+    <label for="sortReviews">Sort reviews by:</label>
+    <select id="sortReviews">
+      <option value="newest">Newest</option>
+      <option value="oldest">Oldest</option>
+      <option value="highest">Highest Rating</option>
+      <option value="lowest">Lowest Rating</option>
+    </select>
+  </section>
+
+  <!-- Reviews List -->
+  <section id="reviewList" class="review-list">
+    <h3>User Reviews</h3>
+    <div id="reviewsContainer">
+      <!-- Reviews will be injected by JS -->
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination">
+      <button id="prevPage">Previous</button>
+      <span id="pageInfo">Page 1</span>
+      <button id="nextPage">Next</button>
+    </div>
+  </section>
+</main>
+
+
+  <footer>
+    <p>&copy; 2025 Video Game Bulletin</p>
+  </footer>
+    <script type="module" src="firebaseAuth.js"></script>
+<script type="module" src="auth.js"></script>
+<script src="script.js"></script>
+<script type="module" src="reviews.js"></script>
+<script type="module">
+import { initAuthPanel } from "./authPanel.js";
+document.addEventListener("DOMContentLoaded", () => {
+  initAuthPanel();
+});
+</script>
+</body>
+</html>
+
