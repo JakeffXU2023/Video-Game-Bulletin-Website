@@ -1,30 +1,39 @@
-import { auth, db, collection, getDocs, addDoc, query, orderBy } from "./firebaseAuth.js";
+import { db, collection, getDocs } from "./firebaseAuth.js";
 
-// DOM Elements
+/* ---------------------------------------------------------
+   DOM ELEMENTS
+--------------------------------------------------------- */
+const gameSelect = document.getElementById("game-select");
+const reviewsContainer = document.getElementById("reviewsContainer");
+const gameInfoBox = document.getElementById("game-info");
+const selectedGameName = document.getElementById("selectedGameName");
+const averageRatingBox = document.getElementById("averageRating"); // optional
+const totalReviewsBox = document.getElementById("totalReviews");   // optional
+const sortSelect = document.getElementById("sortReviews");         // optional
 
-document.addEventListener("DOMContentLoaded", () => {
-  loadGames();
-  loadReviews();
+let currentGame = null;
+
+/* ---------------------------------------------------------
+   INITIALIZATION
+--------------------------------------------------------- */
+document.addEventListener("DOMContentLoaded", async () => {
+  await loadGames();
+  const firstGame = gameSelect?.value;
+  if (firstGame) selectGame(firstGame);
+
+  // Sorting listener
+  if (sortSelect) {
+    sortSelect.addEventListener("change", () => loadReviews(currentGame));
+  }
+
+  if (gameSelect) {
+    gameSelect.addEventListener("change", () => selectGame(gameSelect.value));
+  }
 });
 
-const gameSelect = document.getElementById("game-select");
-const addReviewBtn = document.getElementById("add-review-btn");
-const addReviewSection = document.getElementById("addReviewSection");
-const reviewText = document.getElementById("reviewText");
-const starSelector = document.getElementById("starSelector");
-const submitReviewBtn = document.getElementById("submitReviewBtn");
-const reviewsContainer = document.getElementById("reviewsContainer");
-
-// User info
-const username = localStorage.getItem("vgbUsername");
-const role = localStorage.getItem("vgbRole") || "guest";
-
-// Hide add-review section for guests
-if (addReviewSection && role === "guest") {
-  addReviewSection.style.display = "none";
-}
-
-// Load games
+/* ---------------------------------------------------------
+   LOAD GAMES INTO DROPDOWN
+--------------------------------------------------------- */
 async function loadGames() {
   if (!gameSelect) return;
 
@@ -32,15 +41,7 @@ async function loadGames() {
     const res = await fetch("http://localhost:3000/games");
     const games = await res.json();
 
-    // Clear existing options
     gameSelect.innerHTML = '<option disabled selected>Select a game</option>';
-
-    if (!games.length) {
-      const opt = document.createElement("option");
-      opt.textContent = "No games available";
-      gameSelect.appendChild(opt);
-      return;
-    }
 
     games.forEach(game => {
       const opt = document.createElement("option");
@@ -49,128 +50,105 @@ async function loadGames() {
       gameSelect.appendChild(opt);
     });
 
-    // Set first real game as selected by default
-    gameSelect.selectedIndex = 1;
-
+    if (games.length > 0) gameSelect.selectedIndex = 1;
   } catch (err) {
     console.error(err);
-    const opt = document.createElement("option");
-    opt.textContent = "Failed to load games";
-    gameSelect.appendChild(opt);
+    gameSelect.innerHTML = '<option>Failed to load games</option>';
   }
 }
 
+/* ---------------------------------------------------------
+   SELECT GAME
+--------------------------------------------------------- */
+async function selectGame(title) {
+  currentGame = title;
+  if (selectedGameName) selectedGameName.textContent = title;
 
-// Star rating
-let selectedRating = 0;
-if (starSelector) {
-  starSelector.addEventListener("click", e => {
-    if (!e.target.dataset.value) return;
-    selectedRating = parseInt(e.target.dataset.value);
-    Array.from(starSelector.children).forEach(span => {
-      span.style.color = span.dataset.value <= selectedRating ? "gold" : "gray";
-    });
-  });
+  await loadGameDetails(title);
+  await loadReviews(title);
 }
 
-// Add review button
-if (addReviewBtn && addReviewSection) {
-  addReviewBtn.addEventListener("click", () => {
-    if (role === "guest") {
-      alert("You need to log in to write a review!");
-    } else {
-      addReviewSection.style.display = "block";
+/* ---------------------------------------------------------
+   LOAD SELECTED GAME INFO
+--------------------------------------------------------- */
+async function loadGameDetails(title) {
+  if (!gameInfoBox) return;
+
+  try {
+    const res = await fetch("http://localhost:3000/games");
+    const games = await res.json();
+    const game = games.find(g => g.title === title);
+
+    if (!game) {
+      gameInfoBox.innerHTML = "";
+      return;
     }
-  });
+
+    gameInfoBox.innerHTML = `
+      <h3>${game.title}</h3>
+      <p><strong>Release Date:</strong> ${game.releaseDate}</p>
+      <p><strong>Status:</strong> ${game.status}</p>
+      <p><strong>Developer:</strong> ${game.developer}</p>
+      <p><strong>Publisher:</strong> ${game.publisher}</p>
+      <p><strong>Platforms:</strong> ${game.platforms.join(", ")}</p>
+    `;
+  } catch (err) {
+    console.error("Failed to load game details:", err);
+    gameInfoBox.innerHTML = "<p>Unable to load game information.</p>";
+  }
 }
 
-// Submit review
-if (submitReviewBtn) {
-  submitReviewBtn.addEventListener("click", async () => {
-    if (!gameSelect || !reviewText) return;
-
-    const game = gameSelect.value;
-    const text = reviewText.value.trim();
-    if (!game || !text || !selectedRating) return alert("Select a game, give a rating, and write your review!");
-
-    try {
-      await addDoc(collection(db, "reviews"), {
-        username,
-        game,
-        rating: selectedRating,
-        text,
-        timestamp: Date.now()
-      });
-
-      alert("Review submitted!");
-      reviewText.value = "";
-      selectedRating = 0;
-      if (starSelector) Array.from(starSelector.children).forEach(span => span.style.color = "gray");
-
-      loadReviews(game); // Refresh reviews
-    } catch (err) {
-      console.error(err);
-      alert("Failed to submit review.");
-    }
-  });
-}
-
-// Load reviews
+/* ---------------------------------------------------------
+   LOAD REVIEWS & AVERAGE RATING
+--------------------------------------------------------- */
 async function loadReviews(gameFilter = null) {
   if (!reviewsContainer) return;
-
   reviewsContainer.innerHTML = "Loading reviews...";
 
   try {
-    let q = collection(db, "reviews");
-    const snapshot = await getDocs(q);
+    const snapshot = await getDocs(collection(db, "reviews"));
     reviewsContainer.innerHTML = "";
 
+    let reviews = [];
     snapshot.forEach(doc => {
-  const r = doc.data();
-  if (gameFilter && r.game !== gameFilter) return;
+      const r = doc.data();
+      if (gameFilter && r.game !== gameFilter) return;
+      reviews.push(r);
+    });
 
-  const div = document.createElement("div");
-  div.classList.add("review-item");
-  div.innerHTML = `
-    <h4 class="review-game">${r.game}</h4>
-    <strong class="review-username">${r.username}</strong> 
-    <span class="review-stars">${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)}</span>
-    <p class="review-text">${r.text}</p>
-  `;
-  reviewsContainer.appendChild(div);
-});
+    if (!reviews.length) {
+      reviewsContainer.innerHTML = "<p>No reviews yet.</p>";
+      if (averageRatingBox) averageRatingBox.textContent = "Average Rating: N/A";
+      if (totalReviewsBox) totalReviewsBox.textContent = "Total Reviews: 0";
+      return;
+    }
 
+    // Sorting
+    const sortValue = sortSelect?.value || "newest";
+    if (sortValue === "newest") reviews.sort((a, b) => b.timestamp - a.timestamp);
+    else if (sortValue === "oldest") reviews.sort((a, b) => a.timestamp - b.timestamp);
+    else if (sortValue === "highest") reviews.sort((a, b) => b.rating - a.rating);
+    else if (sortValue === "lowest") reviews.sort((a, b) => a.rating - b.rating);
 
+    // Calculate average rating
+    const avgRating = (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1);
+
+    if (averageRatingBox) averageRatingBox.textContent = `Average Rating: ${avgRating} / 5`;
+    if (totalReviewsBox) totalReviewsBox.textContent = `Total Reviews: ${reviews.length}`;
+
+    // Render reviews
+    reviews.forEach(r => {
+      const div = document.createElement("div");
+      div.classList.add("review-item");
+      div.innerHTML = `
+        <strong>${r.username}</strong>
+        <span>${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)}</span>
+        <p>${r.text}</p>
+      `;
+      reviewsContainer.appendChild(div);
+    });
   } catch (err) {
     console.error(err);
     reviewsContainer.innerHTML = "<p>Failed to load reviews.</p>";
   }
 }
-
-//show game name when selected
-const selectedGameName = document.getElementById("selectedGameName");
-
-if (gameSelect && selectedGameName) {
-  gameSelect.addEventListener("change", () => {
-    loadReviews(gameSelect.value);
-    selectedGameName.textContent = gameSelect.value;
-  });
-
-  // Set initial label
-  if (gameSelect.value && gameSelect.selectedIndex > 0) {
-    selectedGameName.textContent = gameSelect.value;
-  }
-}
-
-
-// Event listener for game selection
-if (gameSelect) {
-  gameSelect.addEventListener("change", () => {
-    loadReviews(gameSelect.value);
-  });
-}
-
-// Initial load
-loadGames();
-loadReviews();

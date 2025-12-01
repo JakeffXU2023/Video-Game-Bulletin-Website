@@ -36,7 +36,7 @@
     <main>
       <section class="reviews">
         <h2>Game Reviews</h2>
-        <p>Share your thoughts on the latest releases!</p>
+        <p>Share your thoughts on both the upcoming and newly releases!</p>
 
         <!-- Game selection -->
         <div class="review-selection">
@@ -45,9 +45,9 @@
             <option disabled selected>Select a game</option>
           </select>
           <!-- Display currently selected game -->
-  <p id="selectedGameLabel">Selected game: <span id="selectedGameName">None</span></p>
-</div>
-        </div>
+          <div id="game-info" class="game-info-box"></div>
+          <p id="averageRating">Average Rating: N/A</p>
+          <p id="totalReviews">Total Reviews: 0</p>
 
         <!-- Write Review Section -->
         <section id="addReviewSection" class="add-review">
@@ -102,7 +102,14 @@
   <!-- Scripts -->
   <script type="module" src="firebaseAuth.js"></script>
   <script type="module" src="auth.js"></script>
-  <script type="module" src="reviews.js"></script>
+  <script type="module" src="user_reviews.js"></script>
   <script src="script.js"></script>
+
+  <script type="module">
+    // Display username dynamically
+    const usernameDisplay = document.getElementById("usernameDisplay");
+    const storedUsername = localStorage.getItem("vgbUsername") || "USER";
+    usernameDisplay.textContent = storedUsername;
+  </script>
 </body>
 </html>

@@ -329,30 +329,102 @@ nav a.active {
 }
 
 .review-item {
-  border: 1px solid #ccc;       /* light border */
-  border-radius: 8px;           /* rounded corners */
-  padding: 12px 16px;           /* spacing inside box */
-  margin-bottom: 12px;          /* space between reviews */
-  background-color: #000000;    /* subtle background */
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* optional shadow */
+  position: relative;
+  padding: 10px 15px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #000000; /* light background */
+  color: #ffffff; /* dark text so it's readable */
 }
 
-.review-item h4.review-game {
+.review-item h4 {
   margin: 0 0 4px 0;
-  font-size: 1.1em;
+  font-size: 16px;
+  color: #b4b2b2; /* slightly darker for game title */
 }
 
-.review-item .review-username {
-  font-weight: bold;
-  margin-right: 8px;
+.review-item strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #15d500; /* username color */
 }
 
-.review-item .review-stars {
-  color: gold;
+.review-item span {
+  display: block;
+  margin-bottom: 6px;
+  color: #f39c12; /* stars color */
 }
 
-.review-item .review-text {
-  margin-top: 6px;
+.review-item p {
+  margin: 0;
+  color: #ffffff; /* review text */
+}
+
+.review-controls {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px; /* space between comment text and buttons */
+}
+
+.review-controls button {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background-color 0.2s ease;
+}
+
+.review-controls button:first-child {
+  background-color: #ffc107; /* Edit - yellow */
+  color: #333;
+}
+
+.review-controls button:first-child:hover {
+  background-color: #e0a800;
+}
+
+.review-controls button:last-child {
+  background-color: #dc3545; /* Delete - red */
+  color: white;
+}
+
+.review-controls button:last-child:hover {
+  background-color: #c82333;
+}
+
+#submitReviewBtn {
+  padding: 8px 16px;
+  background-color: #4CAF50; /* green button */
+  color: #fff; /* white text */
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+#submitReviewBtn:hover {
+  background-color: #45a049; /* slightly darker on hover */
+}
+
+#submitReviewBtn:disabled {
+  background-color: #a5d6a7; /* lighter green when disabled */
+  cursor: not-allowed;
+}
+
+
+.game-info-box {
+  margin-top: 15px;
+  padding: 15px;
+  background: #111;
+  border: 1px solid #444;
+  border-radius: 8px;
+  color: #eee;
+}
+.game-info-box h3 {
+  margin-bottom: 10px;
 }
 
 
@@ -403,5 +475,3 @@ footer {
 .empty {
   background: #222;
 }
-
-
